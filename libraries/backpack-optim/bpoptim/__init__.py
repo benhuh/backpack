@@ -5,6 +5,7 @@ Pytorch optimizers based on BackPACK.
 from .constant_damping import ConstantDampingOptimizer
 from .curvature import (DiagGGNExactCurvature, DiagGGNMCCurvature,
                         KFACCurvature, KFLRCurvature, KFRACurvature,
+                        KFAC2Curvature, KFLR2Curvature, KFRA2Curvature,   # Huh
                         ZeroCurvature)
 from .fancy_damping import FancyDampingOptimizer
 from .lm_damping import LMOptimizer
@@ -190,6 +191,37 @@ def KFRAFancyDampingOptimizer(params, initial_trust_damping=150., **kwargs):
                                  initial_trust_damping=initial_trust_damping,
                                  **kwargs)
 
+
+##############################################################################
+# Huh curvature optimizers                                                  #
+##############################################################################
+
+
+def KFAC2ConstantDampingOptimizer(params, lr=1, damping=1e-16, q = 1/2, **kwargs):
+    return ConstantDampingOptimizer(params,
+                                    KFAC2Curvature,
+                                    lr=lr,
+                                    damping=damping,
+                                    q=q,
+                                    **kwargs)
+
+
+def KFLR2ConstantDampingOptimizer(params, lr=1, damping=1e-16, q = 1/2, **kwargs):
+    return ConstantDampingOptimizer(params,
+                                    KFLR2Curvature,
+                                    lr=lr,
+                                    damping=damping,
+                                    q=q,
+                                    **kwargs)
+
+
+def KFRA2ConstantDampingOptimizer(params, lr=1, damping=1e-16, q = 1/2, **kwargs):
+    return ConstantDampingOptimizer(params,
+                                    KFRA2Curvature,
+                                    lr=lr,
+                                    damping=damping,
+                                    q=q,
+                                    **kwargs)
 
 """
 # How the parameters, steps and second-order approximations are stored

@@ -164,6 +164,7 @@ class KroneckerFactoredCurvature(BackpackCurvatureEstimator):
     def __init__(self, param_groups, bp_extension_cls):
         use_factors = True
         super().__init__(param_groups, bp_extension_cls, use_factors)
+        self.q = 1   # Huh: For full inverses
 
     def multiply(self, damping, grad):
         curv = self.moving_average.get()
@@ -238,16 +239,24 @@ class KroneckerFactoredCurvature(BackpackCurvatureEstimator):
         eigvals, eigvecs = self.__eigen(sym_mat)
         # account for diagonal term added to the matrix
         eigvals.add_(shift)
-        return self.__inv_from_eigen(eigvals, eigvecs)
+        # return self.__inv_from_eigen(eigvals, eigvecs)
+        # Huh: Include option to switch between inverse and sqrt-inverse
+        return self.__partial_inv_from_eigen(eigvals, eigvecs)  # Huh: 
 
     def __eigen(self, sym_mat):
         """Return eigenvalues and eigenvectors from eigendecomposition."""
         eigvals, eigvecs = sym_mat.symeig(eigenvectors=True)
         return eigvals, eigvecs
 
-    def __inv_from_eigen(self, eigvals, eigvecs, truncate=NUMERICAL_STABILITY_CONSTANT):
-        inv_eigvals = 1. / eigvals
-        inv_eigvals.clamp_(min=0., max=1. / truncate)
+    # def __inv_from_eigen(self, eigvals, eigvecs, truncate=NUMERICAL_STABILITY_CONSTANT):
+    #     inv_eigvals = 1. / eigvals
+    #     inv_eigvals.clamp_(min=0., max=1. / truncate)
+    #     # return inv_eigvals, eigvecs
+    #     return einsum('ij,j,kj->ik', (eigvecs, inv_eigvals, eigvecs))
+
+    def __partial_inv_from_eigen(self, eigvals, eigvecs, truncate=NUMERICAL_STABILITY_CONSTANT):  # Huh: 
+        inv_eigvals = 1. / eigvals ** self.q    # Huh: 
+        inv_eigvals.clamp_(min=0., max=1. / truncate) 
         # return inv_eigvals, eigvecs
         return einsum('ij,j,kj->ik', (eigvecs, inv_eigvals, eigvecs))
 
@@ -271,3 +280,28 @@ class KFRACurvature(KroneckerFactoredCurvature):
     def __init__(self, param_groups):
         bp_extension_cls = KFRA
         super().__init__(param_groups, bp_extension_cls)
+
+
+# Huh : 
+class KFAC2Curvature(KroneckerFactoredCurvature):
+    """Kronecker factorization by Martens."""
+    def __init__(self, param_groups):
+        bp_extension_cls = KFAC
+        super().__init__(param_groups, bp_extension_cls)
+        self.q = 1/2
+
+
+class KFLR2Curvature(KroneckerFactoredCurvature):
+    """Kronecker factored low-rank approximation by Botev."""
+    def __init__(self, param_groups):
+        bp_extension_cls = KFLR
+        super().__init__(param_groups, bp_extension_cls)
+        self.q = 1/2
+
+
+class KFRA2Curvature(KroneckerFactoredCurvature):
+    """Kronecker factored recursive approximation by Botev."""
+    def __init__(self, param_groups):
+        bp_extension_cls = KFRA
+        super().__init__(param_groups, bp_extension_cls)
+        self.q = 1/2

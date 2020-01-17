@@ -31,6 +31,9 @@ class GridSearchFactory():
     KFAC = "KFAC"
     KFLR = "KFLR"
     KFRA = "KFRA"
+    KFAC2 = "KFAC2"
+    KFLR2 = "KFLR2"
+    KFRA2 = "KFRA2"
 
     CURVATURES = [
         Zero,
@@ -39,6 +42,9 @@ class GridSearchFactory():
         KFAC,
         KFLR,
         KFRA,
+        KFAC2,
+        KFLR2,
+        KFRA2,
     ]
 
     CURVATURES_TUNING = {
@@ -48,6 +54,9 @@ class GridSearchFactory():
         KFAC: TuningKFAC,
         KFLR: TuningKFLR,
         KFRA: TuningKFRA
+        KFAC2: TuningKFAC2,
+        KFLR2: TuningKFLR2,
+        KFRA2: TuningKFRA2
     }
 
     CONSTANT = "const"
@@ -81,7 +90,12 @@ class GridSearchFactory():
         (KFRA, CONSTANT): bpoptim.KFRAConstantDampingOptimizer,
         (KFRA, LM): bpoptim.KFRALMOptimizer,
         (KFRA, FANCY): bpoptim.KFRAFancyDampingOptimizer,
+        (KFAC2, CONSTANT): bpoptim.KFAC2ConstantDampingOptimizer,
+        (KFLR2, CONSTANT): bpoptim.KFLR2ConstantDampingOptimizer,
+        (KFRA2, CONSTANT): bpoptim.KFRA2ConstantDampingOptimizer,
     }
+
+    # Huh: included KFAC2. KFLR2, KFRA2
 
     def make_grid_search(self,
                          curv_str,

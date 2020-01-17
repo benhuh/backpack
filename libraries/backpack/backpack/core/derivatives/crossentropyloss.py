@@ -37,7 +37,7 @@ class CrossEntropyLossDerivatives(BaseDerivatives):
         original_dev = probs.device
         if probs.is_cuda:
             probs = probs.cpu()
-
+        print(probs.shape)  # Huh: it causes - RuntimeError: prob_dist must be 1 or 2 dim 
         classes = one_hot(multinomial(probs, M, replacement=True),
                           num_classes=C)
 

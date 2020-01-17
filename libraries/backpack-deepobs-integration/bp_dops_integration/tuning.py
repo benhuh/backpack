@@ -54,6 +54,17 @@ class TuningKFLR(NoTuning):
 class TuningKFRA(NoTuning):
     pass
 
+class TuningKFAC2(NoTuning):
+    pass
+
+
+class TuningKFLR2(NoTuning):
+    pass
+
+
+class TuningKFRA2(NoTuning):
+    pass
+
 
 ##############################################################################
 # TUNABLE PARAMETERS FOR DAMPING SCHEMES                                     #
