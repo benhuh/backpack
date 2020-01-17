@@ -11,7 +11,7 @@ The role of those classes is to
 import math
 
 from backpack import backpack
-from backpack.extensions import KFAC, KFLR, KFRA, DiagGGNExact, DiagGGNMC
+from backpack.extensions import KFAC, KFLR, KFRA, KFAC2, KFLR2, KFRA2, DiagGGNExact, DiagGGNMC   # Huh
 from backpack.extensions.secondorder.utils import multiply_vec_with_kron_facs
 from backpack.utils.utils import einsum
 
@@ -281,12 +281,12 @@ class KFRACurvature(KroneckerFactoredCurvature):
         bp_extension_cls = KFRA
         super().__init__(param_groups, bp_extension_cls)
 
-
+######################################
 # Huh : 
 class KFAC2Curvature(KroneckerFactoredCurvature):
     """Kronecker factorization by Martens."""
     def __init__(self, param_groups):
-        bp_extension_cls = KFAC
+        bp_extension_cls = KFAC2
         super().__init__(param_groups, bp_extension_cls)
         self.q = 1/2
 
@@ -294,7 +294,7 @@ class KFAC2Curvature(KroneckerFactoredCurvature):
 class KFLR2Curvature(KroneckerFactoredCurvature):
     """Kronecker factored low-rank approximation by Botev."""
     def __init__(self, param_groups):
-        bp_extension_cls = KFLR
+        bp_extension_cls = KFLR2
         super().__init__(param_groups, bp_extension_cls)
         self.q = 1/2
 
@@ -302,6 +302,6 @@ class KFLR2Curvature(KroneckerFactoredCurvature):
 class KFRA2Curvature(KroneckerFactoredCurvature):
     """Kronecker factored recursive approximation by Botev."""
     def __init__(self, param_groups):
-        bp_extension_cls = KFRA
+        bp_extension_cls = KFRA2
         super().__init__(param_groups, bp_extension_cls)
         self.q = 1/2

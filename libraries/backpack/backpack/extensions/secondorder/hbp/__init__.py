@@ -181,3 +181,40 @@ class KFLR(HBP):
             ea_strategy=ExpectationApproximation.BOTEV_MARTENS,
             savefield="kflr",
         )
+
+
+############################################
+# Huh
+
+class KFAC2(HBP):
+    def __init__(self):
+        super().__init__(
+            curv_type=Curvature.GGN,
+            loss_hessian_strategy=LossHessianStrategy.SAMPLING,
+            backprop_strategy=BackpropStrategy.SQRT,
+            ea_strategy=ExpectationApproximation.BOTEV_MARTENS,
+            savefield="kfac2"
+        )
+
+
+class KFRA2(HBP):
+    def __init__(self):
+        super().__init__(
+            curv_type=Curvature.GGN,
+            loss_hessian_strategy=LossHessianStrategy.AVERAGE,
+            backprop_strategy=BackpropStrategy.BATCH_AVERAGE,
+            ea_strategy=ExpectationApproximation.BOTEV_MARTENS,
+            savefield="kfra2",
+        )
+
+
+class KFLR2(HBP):
+
+    def __init__(self):
+        super().__init__(
+            curv_type=Curvature.GGN,
+            loss_hessian_strategy=LossHessianStrategy.EXACT,
+            backprop_strategy=BackpropStrategy.SQRT,
+            ea_strategy=ExpectationApproximation.BOTEV_MARTENS,
+            savefield="kflr2",
+        )
