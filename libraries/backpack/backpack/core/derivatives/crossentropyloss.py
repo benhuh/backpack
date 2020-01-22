@@ -30,6 +30,7 @@ class CrossEntropyLossDerivatives(BaseDerivatives):
     def sqrt_hessian_sampled(self, module, g_inp, g_out):
         M = self.MC_SAMPLES
         C = module.input0.shape[1]
+#         print(M, module.input0.shape)
 
         probs = self.get_probs(module).unsqueeze(-1).repeat(1, 1, M)
 
@@ -37,7 +38,8 @@ class CrossEntropyLossDerivatives(BaseDerivatives):
         original_dev = probs.device
         if probs.is_cuda:
             probs = probs.cpu()
-        print(probs.shape)  # Huh: it causes - RuntimeError: prob_dist must be 1 or 2 dim 
+#         probs = probs.squeeze()
+#         print(probs.shape)  # Huh: it causes - RuntimeError: prob_dist must be 1 or 2 dim 
         classes = one_hot(multinomial(probs, M, replacement=True),
                           num_classes=C)
 
@@ -46,6 +48,8 @@ class CrossEntropyLossDerivatives(BaseDerivatives):
         # END
 
         classes = classes.transpose(1, 2).float()
+#         classes = classes.squeeze()
+#         print(probs.shape, classes.shape)
 
         sqrt_mc_h = (probs - classes) / sqrt(M)
 

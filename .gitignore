@@ -315,3 +315,4 @@ code/plots/**/*dampings*.tex
 *.pdf
 .DS_Store
 data/
+.ipynb_checkpoints/
