@@ -22,9 +22,10 @@ import torchvision
 # The main BackPACK functionalities
 from backpack import backpack, extend
 # The diagonal GGN extension
-from backpack.extensions import DiagGGNMC
+from backpack.extensions import DiagGGNMC, DiagGGNExact, KFLR2, KFLR
 # This layer did not exist in Pytorch 1.0
 from backpack.core.layers import Flatten
+from bpoptim import KFRA2ConstantDampingOptimizer, KFRAConstantDampingOptimizer
 
 # Hyperparameters
 BATCH_SIZE = 64
@@ -94,19 +95,20 @@ and update the weights
 """
 
 
-class DiagGGNOptimizer(torch.optim.Optimizer):
-    def __init__(self, parameters, step_size, damping):
-        super().__init__(
-            parameters, 
-            dict(step_size=step_size, damping=damping)
-        )
+# class DiagGGNOptimizer(torch.optim.Optimizer):
+#     def __init__(self, parameters, step_size, damping):
+#         super().__init__(
+#             parameters, 
+#             dict(step_size=step_size, damping=damping)
+#         )
 
-    def step(self):
-        for group in self.param_groups:
-            for p in group["params"]:
-                step_direction = p.grad / (p.diag_ggn_mc + group["damping"])
-                p.data.add_(-group["step_size"], step_direction)
-        return loss
+#     def step(self):
+#         for group in self.param_groups:
+#             for p in group["params"]:
+#                 step_direction = p.grad / (p.diag_ggn_exact + group["damping"])
+#                 # step_direction = p.grad / (p.diag_ggn_mc + group["damping"])
+#                 p.data.add_(-group["step_size"], step_direction)
+#         return loss
 
 
 
@@ -118,11 +120,19 @@ create the optimizer, and we will be ready to go
 extend(model)
 extend(loss_function)
 
-optimizer = DiagGGNOptimizer(
+# optimizer = DiagGGNOptimizer(
+#     model.parameters(), 
+#     step_size=STEP_SIZE, 
+#     damping=DAMPING
+# )
+
+# optimizer = KFRA2ConstantDampingOptimizer(
+optimizer = KFRAConstantDampingOptimizer(
     model.parameters(), 
-    step_size=STEP_SIZE, 
+    lr=1, 
     damping=DAMPING
 )
+
 
 
 """
@@ -143,10 +153,13 @@ for batch_idx, (x, y) in enumerate(mnist_loader):
 
     accuracy = get_accuracy(output, y)
 
-    with backpack(DiagGGNMC()):
+    # with backpack(DiagGGNExact()): # with backpack(DiagGGNMC()):
+    with backpack(KFLR2()):
         loss = loss_function(output, y)
         loss.backward()
         optimizer.step()
+        # def closure(): return loss, output
+        # optimizer.step(closure)
 
     print(
         "Iteration %3.d/%d   " % (batch_idx, MAX_ITER) +

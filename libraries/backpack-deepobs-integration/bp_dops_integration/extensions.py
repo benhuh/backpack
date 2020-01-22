@@ -6,5 +6,5 @@ from deepobs.pytorch.testproblems.testproblems_utils import flatten
 
 def extend_deepobs_flatten():
     """Inform BackPACK how to deal with DeepOBS flatten layer."""
-    print("[DEBUG] BackPACK: Extend DeepOBS layer flatten")
+    # print("[DEBUG] BackPACK: Extend DeepOBS layer flatten")
     DiagGGN.add_module_extension(flatten, DiagGGNFlatten())

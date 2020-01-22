@@ -6,13 +6,14 @@ class ConstantDampingOptimizer(BaseOptimizer):
                  params,
                  curvature,
                  lr=1.,
+                 q=1.,
                  damping=.1,
                  weight_decay=0.,
                  update_interval_inv=20):
 
         self.validate_hyperparameters(lr, damping, weight_decay,
                                       update_interval_inv)
-
+        self.q = q
         self.damping = damping
         self.update_interval_inversion = update_interval_inv
         self.step_counter = 0

@@ -2,11 +2,12 @@ import pprint
 
 import bpoptim
 
-from .grid_search import BPGridSearch
-from .tuning import (TuningConstantDamping, TuningConstantDampingNoCurvature,
+from bp_dops_integration.grid_search import BPGridSearch
+from bp_dops_integration.tuning import (TuningConstantDamping, TuningConstantDampingNoCurvature,
                      TuningDiagGGNExact, TuningDiagGGNMC, TuningFancyDamping,
-                     TuningKFAC, TuningKFLR, TuningKFRA, TuningLMDamping,
-                     TuningZero)
+                     TuningKFAC, TuningKFLR, TuningKFRA, 
+                     TuningKFAC2, TuningKFLR2, TuningKFRA2, 
+                     TuningLMDamping, TuningZero)
 
 PROBLEMS = [
     'mnist_logreg',
@@ -53,7 +54,7 @@ class GridSearchFactory():
         DiagGGNMC: TuningDiagGGNMC,
         KFAC: TuningKFAC,
         KFLR: TuningKFLR,
-        KFRA: TuningKFRA
+        KFRA: TuningKFRA,
         KFAC2: TuningKFAC2,
         KFLR2: TuningKFLR2,
         KFRA2: TuningKFRA2
