@@ -1,0 +1,38 @@
+
+  File "KFACConstantDampingOptimizer.py", line 15, in <module>
+    runner.run()
+  File "/home/huh/Projects/backpack/libraries/backpack-deepobs-integration/bp_dops_integration/runners.py", line 390, in run
+    **training_params)
+  File "/home/huh/Projects/backpack/src/deepobs/deepobs/abstract_runner/abstract_runner.py", line 143, in run
+    return self._run(**args)
+  File "/home/huh/Projects/backpack/src/deepobs/deepobs/abstract_runner/abstract_runner.py", line 192, in _run
+    tb_log_dir, **training_params)
+  File "/home/huh/Projects/backpack/libraries/backpack-deepobs-integration/bp_dops_integration/runners.py", line 169, in training
+    batch_loss, step_info = self._perform_step(opt, tproblem)
+  File "/home/huh/Projects/backpack/libraries/backpack-deepobs-integration/bp_dops_integration/runners.py", line 287, in _perform_step
+    batch_loss = optimizer.step(closure)
+  File "/home/huh/Projects/backpack/libraries/backpack-optim/bpoptim/constant_damping.py", line 43, in step
+    loss, _ = self.curv.compute_curvature(closure)
+  File "/home/huh/Projects/backpack/libraries/backpack-optim/bpoptim/curvature.py", line 116, in compute_curvature
+    loss.backward(retain_graph=retain_graph)
+  File "/home/huh/miniconda3/envs/backpack3/lib/python3.7/site-packages/torch/tensor.py", line 195, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph)
+  File "/home/huh/miniconda3/envs/backpack3/lib/python3.7/site-packages/torch/autograd/__init__.py", line 99, in backward
+    allow_unreachable=True)  # allow_unreachable flag
+  File "/home/huh/Projects/backpack/libraries/backpack/backpack/__init__.py", line 113, in run_extensions
+    backpack_extension.apply(module_, g_inp, g_out)
+  File "/home/huh/Projects/backpack/libraries/backpack/backpack/extensions/backprop_extension.py", line 82, in apply
+    module_extension(self, module, g_inp, g_out)
+  File "/home/huh/Projects/backpack/libraries/backpack/backpack/extensions/module_extension.py", line 75, in apply
+    ext, module, g_inp, g_out, bpQuantities
+  File "/home/huh/Projects/backpack/libraries/backpack/backpack/extensions/secondorder/hbp/linear.py", line 21, in weight
+    return self._weight_for_sqrt(ext, module, backproped)
+  File "/home/huh/Projects/backpack/libraries/backpack/backpack/extensions/secondorder/hbp/linear.py", line 29, in _weight_for_sqrt
+    kron_factors = self._factor_from_sqrt(backproped)
+  File "/home/huh/Projects/backpack/libraries/backpack/backpack/extensions/secondorder/hbp/linear.py", line 43, in _factor_from_sqrt
+    return [einsum('bic,bjc->ij', (backproped, backproped))]
+  File "/home/huh/Projects/backpack/libraries/backpack/backpack/utils/utils.py", line 32, in einsum
+    return EINSUMS[BPEXTS_EINSUM](equation, *operands)
+  File "/home/huh/miniconda3/envs/backpack3/lib/python3.7/site-packages/torch/functional.py", line 241, in einsum
+    return torch._C._VariableFunctions.einsum(equation, operands)
+RuntimeError: dimension mismatch for operand 0: equation 3 tensor 2

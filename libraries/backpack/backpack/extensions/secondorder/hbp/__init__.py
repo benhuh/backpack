@@ -10,11 +10,12 @@ from . import pooling, conv2d, linear, activations, losses, padding, dropout, fl
 
 
 class HBP(BackpropExtension):
-    def __init__(self, curv_type, loss_hessian_strategy, backprop_strategy, ea_strategy, savefield="hbp"):
+    def __init__(self, curv_type, loss_hessian_strategy, backprop_strategy, ea_strategy, savefield="hbp", inverse_power = 1.0):
         self.curv_type = curv_type
         self.loss_hessian_strategy = loss_hessian_strategy
         self.backprop_strategy = backprop_strategy
         self.ea_strategy = ea_strategy
+        self.inverse_power = inverse_power  # Huh: 1 or 1/2 for full-inverse or sqrt-inverse
 
         super().__init__(
             savefield=savefield,
@@ -89,7 +90,8 @@ class KFAC(HBP):
             loss_hessian_strategy=LossHessianStrategy.SAMPLING,
             backprop_strategy=BackpropStrategy.SQRT,
             ea_strategy=ExpectationApproximation.BOTEV_MARTENS,
-            savefield="kfac"
+            savefield="kfac",
+            inverse_power = 1.0
         )
 
 
@@ -134,6 +136,7 @@ class KFRA(HBP):
             backprop_strategy=BackpropStrategy.BATCH_AVERAGE,
             ea_strategy=ExpectationApproximation.BOTEV_MARTENS,
             savefield="kfra",
+            inverse_power = 1.0
         )
 
 
@@ -180,6 +183,7 @@ class KFLR(HBP):
             backprop_strategy=BackpropStrategy.SQRT,
             ea_strategy=ExpectationApproximation.BOTEV_MARTENS,
             savefield="kflr",
+            inverse_power = 1.0
         )
 
 
@@ -193,7 +197,8 @@ class KFAC2(HBP):
             loss_hessian_strategy=LossHessianStrategy.SAMPLING,
             backprop_strategy=BackpropStrategy.SQRT,
             ea_strategy=ExpectationApproximation.BOTEV_MARTENS,
-            savefield="kfac2"
+            savefield="kfac2",
+            inverse_power = 1/2
         )
 
 
@@ -205,6 +210,7 @@ class KFRA2(HBP):
             backprop_strategy=BackpropStrategy.BATCH_AVERAGE,
             ea_strategy=ExpectationApproximation.BOTEV_MARTENS,
             savefield="kfra2",
+            inverse_power = 1/2
         )
 
 
@@ -217,4 +223,5 @@ class KFLR2(HBP):
             backprop_strategy=BackpropStrategy.SQRT,
             ea_strategy=ExpectationApproximation.BOTEV_MARTENS,
             savefield="kflr2",
+            inverse_power = 1/2
         )

@@ -12,13 +12,16 @@ class BaseOptimizer(Optimizer):
     def __init__(self, params, defaults, curvature):
         self.param_groups = None
         super().__init__(params, defaults=defaults)
-
+        
         # Create curv after __init__: need the param_groups to exists
         self.curv = curvature(self.param_groups)
         self.inv_curv = None
 
         # information about the last step
         self.step_info = {}
+
+        # Huh
+        print('update_interval_inversion = ', self.update_interval_inversion)  
 
     def regularized_neg_grad(self):
         """

@@ -21,6 +21,7 @@ from .inverse_curvature import (DiagonalInverseCurvature,
                                 ScalarInverseCurvature)
 from .moving_average import MovingAverage
 
+# from pdb import set_trace
 
 class CurvatureEstimator:
     def __init__(self, param_groups):
@@ -104,21 +105,26 @@ class BackpackCurvatureEstimator(CurvatureEstimator):
     def __init__(self, param_groups, bp_extension_cls, use_factors):
         super().__init__(param_groups)
         self.moving_average = MovingAverage(use_factors=use_factors)
-        self.bp_extension_cls = bp_extension_cls
+        self.bp_extension = bp_extension_cls()
+        self.bp_savefield = self.bp_extension.savefield
+        self.inverse_power = self.bp_extension.inverse_power
+
 
     def compute_curvature(self, closure, retain_graph=False):
         """Data structure for moving average is supported by backpack."""
-        bp_extension = self.bp_extension_cls()
-        bp_savefield = bp_extension.savefield
 
-        with backpack(bp_extension):
+        with backpack(self.bp_extension):
             loss, output = closure()
             loss.backward(retain_graph=retain_graph)
 
             input_to_moving_average = list([
-                list([getattr(p, bp_savefield) for p in group['params']])
+                list([getattr(p, self.bp_savefield) for p in group['params']])
                 for group in self.param_groups
             ])
+
+            # set_trace()  
+            # # Huh
+            # !!!  input_to_moving_average == current GGN/Hessian info !!! Now to understand how it's computed..
 
             self.moving_average.step(input_to_moving_average)
 
@@ -164,9 +170,9 @@ class KroneckerFactoredCurvature(BackpackCurvatureEstimator):
     def __init__(self, param_groups, bp_extension_cls):
         use_factors = True
         super().__init__(param_groups, bp_extension_cls, use_factors)
-        self.q = 1   # Huh: For full inverses
+        # self.q = None   # Huh: For full inverses
 
-    def multiply(self, damping, grad):
+    def multiply(self, damping, grad): # Apply inverse_curvature to gradient
         curv = self.moving_average.get()
         result = []
         for curv_group, damping_group, grad_group in zip(curv, damping, grad):
@@ -239,25 +245,21 @@ class KroneckerFactoredCurvature(BackpackCurvatureEstimator):
         eigvals, eigvecs = self.__eigen(sym_mat)
         # account for diagonal term added to the matrix
         eigvals.add_(shift)
-        # return self.__inv_from_eigen(eigvals, eigvecs)
-        # Huh: Include option to switch between inverse and sqrt-inverse
-        return self.__partial_inv_from_eigen(eigvals, eigvecs)  # Huh: 
+        
+        # Huh: switch between inverse and sqrt-inverse
+        if self.inverse_power !=1:   
+            eigvals.pow_(self.inverse_power)
+
+        return self.__inv_from_eigen(eigvals, eigvecs)
 
     def __eigen(self, sym_mat):
         """Return eigenvalues and eigenvectors from eigendecomposition."""
         eigvals, eigvecs = sym_mat.symeig(eigenvectors=True)
         return eigvals, eigvecs
 
-    # def __inv_from_eigen(self, eigvals, eigvecs, truncate=NUMERICAL_STABILITY_CONSTANT):
-    #     inv_eigvals = 1. / eigvals
-    #     inv_eigvals.clamp_(min=0., max=1. / truncate)
-    #     # return inv_eigvals, eigvecs
-    #     return einsum('ij,j,kj->ik', (eigvecs, inv_eigvals, eigvecs))
-
-    def __partial_inv_from_eigen(self, eigvals, eigvecs, truncate=NUMERICAL_STABILITY_CONSTANT):  # Huh: 
-        inv_eigvals = 1. / eigvals ** self.q    # Huh: 
-        inv_eigvals.clamp_(min=0., max=1. / truncate) 
-        # return inv_eigvals, eigvecs
+    def __inv_from_eigen(self, eigvals, eigvecs, truncate=NUMERICAL_STABILITY_CONSTANT):
+        inv_eigvals = 1. / eigvals
+        inv_eigvals.clamp_(min=0., max=1. / truncate)
         return einsum('ij,j,kj->ik', (eigvecs, inv_eigvals, eigvecs))
 
 
@@ -288,7 +290,6 @@ class KFAC2Curvature(KroneckerFactoredCurvature):
     def __init__(self, param_groups):
         bp_extension_cls = KFAC2
         super().__init__(param_groups, bp_extension_cls)
-        self.q = 1/2
 
 
 class KFLR2Curvature(KroneckerFactoredCurvature):
@@ -296,7 +297,6 @@ class KFLR2Curvature(KroneckerFactoredCurvature):
     def __init__(self, param_groups):
         bp_extension_cls = KFLR2
         super().__init__(param_groups, bp_extension_cls)
-        self.q = 1/2
 
 
 class KFRA2Curvature(KroneckerFactoredCurvature):
@@ -304,4 +304,3 @@ class KFRA2Curvature(KroneckerFactoredCurvature):
     def __init__(self, param_groups):
         bp_extension_cls = KFRA2
         super().__init__(param_groups, bp_extension_cls)
-        self.q = 1/2

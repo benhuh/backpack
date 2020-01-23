@@ -10,12 +10,16 @@ from ...utils.utils import einsum
 from .basederivatives import BaseDerivatives
 from .utils import hmp_unsqueeze_if_missing_dim
 
+    # LossHessianStrategy.EXACT: self.derivatives.sqrt_hessian,
+    # LossHessianStrategy.SAMPLING: self.derivatives.sqrt_hessian_sampled,
+    # LossHessianStrategy.AVERAGE: self.derivatives.sum_hessian,
 
 class CrossEntropyLossDerivatives(BaseDerivatives):
     def get_module(self):
         return CrossEntropyLoss
 
-    def sqrt_hessian(self, module, g_inp, g_out):
+    def sqrt_hessian(self, module, g_inp, g_out):  
+        # Exact: called by KFLR, KFLR2 ...
         probs = self.get_probs(module)
         tau = torchsqrt(probs)
         Id = diag_embed(ones_like(probs))
@@ -28,30 +32,18 @@ class CrossEntropyLossDerivatives(BaseDerivatives):
         return sqrt_H
 
     def sqrt_hessian_sampled(self, module, g_inp, g_out):
+        # Called by KFAC, KFAC2, GGNMC ...
         M = self.MC_SAMPLES
         C = module.input0.shape[1]
 #         print(M, module.input0.shape)
 
-        probs = self.get_probs(module).unsqueeze(-1).repeat(1, 1, M)
+        probs = self.get_probs(module) #.unsqueeze(-1).repeat(1, 1, M)
 
-        # HOTFIX (torch bug): multinomial not working with CUDA
-        original_dev = probs.device
-        if probs.is_cuda:
-            probs = probs.cpu()
-#         probs = probs.squeeze()
-#         print(probs.shape)  # Huh: it causes - RuntimeError: prob_dist must be 1 or 2 dim 
-        classes = one_hot(multinomial(probs, M, replacement=True),
-                          num_classes=C)
 
-        probs = probs.to(original_dev)
-        classes = classes.to(original_dev)
-        # END
-
-        classes = classes.transpose(1, 2).float()
-#         classes = classes.squeeze()
-#         print(probs.shape, classes.shape)
-
-        sqrt_mc_h = (probs - classes) / sqrt(M)
+        ## Huh: Debugged
+        samples = multinomial(probs, M, replacement = True)
+        classes = one_hot(samples,  num_classes=C).transpose(1, 2).float()
+        sqrt_mc_h = (probs.unsqueeze(-1).repeat(1, 1, M) - classes) / sqrt(M)
 
         if module.reduction is "mean":
             sqrt_mc_h /= sqrt(module.input0.shape[0])

@@ -11,25 +11,19 @@ class HBPBaseModule(ModuleExtension):
     def backpropagate(self, ext, module, g_inp, g_out, backproped):
         bp_strategy = ext.get_backprop_strategy()
 
-        if BackpropStrategy.is_batch_average(bp_strategy):
-            return self.backpropagate_batch_average(
-                ext, module, g_inp, g_out, backproped
-            )
+        if BackpropStrategy.is_batch_average(bp_strategy):   # Huh: GGN for KFRA, KFRA2
+            return self.backpropagate_batch_average(ext, module, g_inp, g_out, backproped)
 
-        elif BackpropStrategy.is_sqrt(bp_strategy):
-            return self.backpropagate_sqrt(
-                ext, module, g_inp, g_out, backproped
-            )
+        elif BackpropStrategy.is_sqrt(bp_strategy):    # Huh: GGN for KLFR, KLFR2
+            return self.backpropagate_sqrt(ext, module, g_inp, g_out, backproped)
 
     def backpropagate_sqrt(self, ext, module, g_inp, g_out, H):
-        return self.derivatives.jac_t_mat_prod(
-            module, g_inp, g_out, H
-        )
+        return self.derivatives.jac_t_mat_prod(module, g_inp, g_out, H)
+        # Huh: GGN for KLFR computed !!! - now understand how it computes it. 
 
     def backpropagate_batch_average(self, ext, module, g_inp, g_out, H):
-        ggn = self.derivatives.ea_jac_t_mat_jac_prod(
-            module, g_inp, g_out, H
-        )
+        ggn = self.derivatives.ea_jac_t_mat_jac_prod(module, g_inp, g_out, H)
+        # Huh: GGN for KFRA  computed !!! - now understand how it computes it. 
 
         residual = self.second_order_module_effects(module, g_inp, g_out)
         residual_mod = Curvature.modify_residual(residual, ext.get_curv_type())

@@ -6,7 +6,8 @@ set -e
 green='\e[1;32m%s\e[0m\n'
 
 conda create --force --yes --name backpack_paper_env python=3.7 pip
-source ~/anaconda3/bin/activate backpack_paper_env
+# source ~/anaconda3/bin/activate backpack_paper_env
+conda activate backpack_paper_env
 
 # Dependencies, torch with CUDA
 conda install --yes pytorch torchvision -c pytorch
