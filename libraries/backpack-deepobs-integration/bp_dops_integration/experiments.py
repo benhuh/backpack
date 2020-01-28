@@ -13,6 +13,7 @@ PROBLEMS = [
     'mnist_logreg',
     'fmnist_2c2d',
     'cifar10_3c3d',
+    'cifar10_3c3d_small',
     'cifar100_allcnnc',
 ]
 

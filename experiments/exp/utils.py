@@ -146,6 +146,9 @@ def _exclude(damping, problem, curvature):
     def is_cifar10_3c3d(problem):
         return problem == "cifar10_3c3d"
 
+    def is_cifar10_3c3d_small(problem):
+        return problem == "cifar10_3c3d_small"
+
     def is_cifar100_allcnnc(problem):
         return problem == "cifar100_allcnnc"
 
@@ -167,8 +170,9 @@ def _exclude(damping, problem, curvature):
         kfra = is_kfra(curvature)
         fmnist = is_fmnist_2c2d(problem)
         cifar10 = is_cifar10_3c3d(problem)
+        cifar10_small = is_cifar10_3c3d_small(problem)
         cifar100 = is_cifar100_allcnnc(problem)
-        return kfra and (cifar10 or cifar100 or fmnist)
+        return kfra and (cifar10 or cifar10_small or cifar100 or fmnist)
 
     def exclude_DiagGGNExact_for_cifar100(damping, problem, curvature):
         diaggn = is_diag_ggn_exact(curvature)
