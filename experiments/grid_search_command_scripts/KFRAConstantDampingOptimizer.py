@@ -8,6 +8,10 @@ runner_cls = BPOptimRunner
 optim_cls = KFRAConstantDampingOptimizer
 runner_hyperparams = {'damping': {'type': float}, 'lr': {'type': float}}
 
+# import pdb
+# pdb.set_trace()
+
+
 # build runner
 runner = runner_cls(optim_cls, runner_hyperparams)
 

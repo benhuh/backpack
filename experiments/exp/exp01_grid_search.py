@@ -30,3 +30,18 @@ if __name__ == "__main__":
     filter_func = make_filter_func()
 
     create_runscripts(filter_func=filter_func)
+
+    
+    
+# You can restrict to a single DeepOBS testproblem by specifying the --dobs_problem option. If not specified, all run scripts will be created:
+
+# python exp01_grid_search.py --help
+
+# usage: exp01_grid_search.py [-h]
+#                             [--dobs_problem {mnist_logreg,fmnist_2c2d,cifar10_3c3d,cifar100_allcnnc,all}]
+
+# Choose the `DeepOBS` problem
+
+# optional arguments:
+#   -h, --help            show this help message and exit
+#   --dobs_problem {mnist_logreg,fmnist_2c2d,cifar10_3c3d,cifar100_allcnnc,all}

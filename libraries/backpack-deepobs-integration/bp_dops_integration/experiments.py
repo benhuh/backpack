@@ -24,6 +24,13 @@ BATCH_SIZES = [
     # 512,
 ]
 
+# Huh
+INIT_GAINS = [  #     10,
+    1.,
+    0.1/2,
+    0.01/4,
+]
+
 
 class GridSearchFactory():
     Zero = "Zero"

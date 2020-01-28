@@ -6,7 +6,7 @@ import os
 
 ##############################################################################
 # grid search
-from bp_dops_integration.experiments import (BATCH_SIZES, PROBLEMS,
+from bp_dops_integration.experiments import (BATCH_SIZES, PROBLEMS, INIT_GAINS,
                                              GridSearchFactory)
 
 DAMPINGS = GridSearchFactory.DAMPINGS
@@ -95,6 +95,7 @@ def allowed_combinations(filter_func=None):
     """Return tuples (curv, damp, prob) of allowed configs."""
     return _allowed_combinations(DAMPINGS,
                                  PROBLEMS,
+                                 INIT_GAINS,  # Huh
                                  CURVATURES,
                                  filter_func=filter_func)
 
@@ -118,11 +119,11 @@ def _allowed_combinations(dampings, problems, curvatures, filter_func=None):
             for curv in curvatures:
                 skip_due_filter = not filter_func(curv, damp, prob)
                 if skip_due_filter:
-                    _print_exclude_message(damp, prob, curv, filter_func)
+                    _print_exclude_message(damp, prob, gain, curv, filter_func) # Huh: gain
                     continue
 
-                if not _exclude(damp, prob, curv):
-                    allow.append((curv, damp, prob))
+                if not _exclude(damp, prob, gain, curv):  # Huh: gain
+                    allow.append((curv, damp, prob, gain))      # Huh: gain
     return allow
 
 
@@ -131,14 +132,26 @@ def _exclude(damping, problem, curvature):
     def is_zero(curvature):
         return curvature == GridSearchFactory.Zero
 
+    def is_kfac(curvature):
+        return curvature == GridSearchFactory.KFAC
+
+    def is_kfac2(curvature):
+        return curvature == GridSearchFactory.KFAC2
+
     def is_kfra(curvature):
         return curvature == GridSearchFactory.KFRA
+
+    def is_kfra2(curvature):
+        return curvature == GridSearchFactory.KFRA2
 
     def is_diag_ggn_exact(curvature):
         return curvature == GridSearchFactory.DiagGGNExact
 
     def is_kflr(curvature):
         return curvature == GridSearchFactory.KFLR
+
+    def is_kflr2(curvature):
+        return curvature == GridSearchFactory.KFLR2
 
     def is_fmnist_2c2d(problem):
         return problem == "fmnist_2c2d"
@@ -154,6 +167,8 @@ def _exclude(damping, problem, curvature):
 
     def is_lm(damping):
         return damping == GridSearchFactory.LM
+    
+    ################## combination #######################
 
     def exclude_zero(damping, problem, curvature):
         return is_zero(curvature)
@@ -163,30 +178,32 @@ def _exclude(damping, problem, curvature):
         fancy = is_fancy(damping)
         return lm or fancy
 
-    def exclude_KFRA_for_fmnist_cifar10_cifar100(damping, problem, curvature):
+    def exclude_KFRA12_for_fmnist_cifar10_cifar100(damping, problem, curvature):
         kfra = is_kfra(curvature)
+        kfra2 = is_kfra2(curvature)
         fmnist = is_fmnist_2c2d(problem)
         cifar10 = is_cifar10_3c3d(problem)
         cifar100 = is_cifar100_allcnnc(problem)
-        return kfra and (cifar10 or cifar100 or fmnist)
+        return (kfra or kfra2) and (cifar10 or cifar100 or fmnist)
 
     def exclude_DiagGGNExact_for_cifar100(damping, problem, curvature):
         diaggn = is_diag_ggn_exact(curvature)
         cifar100 = is_cifar100_allcnnc(problem)
         return diaggn and cifar100
 
-    def exclude_KFLR_for_cifar100(damping, problem, curvature):
+    def exclude_KFLR12_for_cifar100(damping, problem, curvature):
         kflr = is_kflr(curvature)
+        kflr2 = is_kflr2(curvature)
         cifar100 = is_cifar100_allcnnc(problem)
-        return kflr and cifar100
+        return (kflr or kflr2) and cifar100
 
     # add more criteria to exclude runs
     criteria = [
         exclude_zero,
         exclude_lm_and_fancy,
-        exclude_KFRA_for_fmnist_cifar10_cifar100,
+        exclude_KFRA12_for_fmnist_cifar10_cifar100,
         exclude_DiagGGNExact_for_cifar100,
-        exclude_KFLR_for_cifar100,
+        exclude_KFLR12_for_cifar100,
     ]
 
     for criterion in criteria:
