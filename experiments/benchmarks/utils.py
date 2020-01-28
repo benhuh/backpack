@@ -22,7 +22,7 @@ from torchvision import datasets
 from torchvision.transforms import transforms
 
 from backpack import backpack, extend
-from benchmark_networks import net_cifar100_allcnnc, net_cifar10_3c3d, net_fmnist_2c2d
+from benchmark_networks import net_cifar100_allcnnc, net_cifar10_3c3d, net_cifar10_3c3d_small, net_fmnist_2c2d
 
 """
 Data loading
@@ -71,6 +71,19 @@ def data_prep_cifar100(use_sigmoid=False):
 
 def data_prep_cifar10(use_sigmoid=False):
     model = extend(net_cifar10_3c3d(use_sigmoid)).to(device)
+    lossfunc = extend(nn.CrossEntropyLoss())
+
+    dataset = datasets.CIFAR10(
+        './data',
+        train=True,
+        download=True,
+        transform=cifar_transform
+    )
+
+    return model, lossfunc, make_loader_for_dataset(dataset)
+
+def data_prep_cifar10_small(use_sigmoid=False):
+    model = extend(net_cifar10_3c3d_small(use_sigmoid)).to(device)
     lossfunc = extend(nn.CrossEntropyLoss())
 
     dataset = datasets.CIFAR10(
